@@ -14,17 +14,11 @@ function Space(xCoordinate, yCoordinate, mark) {
 };
 
 function Board() {
-  this.players = [];
+  this.newPlayers();
   this.newBoard();
 };
 
-Player.prototype.setMark = function() {
-  return this.markType;
-};
 
-Player.prototype.getMark = function() {
-  return this.markType;
-};
 
 Space.prototype.getCoordinates = function() {
     return this.xCoordinate, this.yCoordinate;
@@ -42,28 +36,54 @@ Board.prototype.findCoordinates = function(x, y) {
 
 Board.prototype.checkWinMark = function() {
   var winningMark;
-  if (this.spaces[0].mark === this.spaces[1].mark === this.spaces[2].mark) {
+  if ((this.spaces[0].mark === this.spaces[1].mark) && (this.spaces[0].mark === this.spaces[2].mark) && (this.spaces[0].mark != undefined)) {
     winningMark = this.spaces[0].mark;
-  } else if (this.spaces[3].mark === this.spaces[4].mark === this.spaces[5].mark) {
+  } else if ((this.spaces[3].mark === this.spaces[4].mark) && (this.spaces[3].mark === this.spaces[5].mark)&& (this.spaces[3].mark != undefined)) {
     winningMark = this.spaces[3].mark;
-  } else if (this.spaces[6].mark === this.spaces[7].mark === this.spaces[8].mark) {
+  } else if ((this.spaces[6].mark === this.spaces[7].mark) && (this.spaces[6].mark === this.spaces[8].mark)&& (this.spaces[6].mark != undefined)) {
     winningMark = this.spaces[6].mark;
-  } else if (this.spaces[0].mark === this.spaces[3].mark === this.spaces[6].mark) {
+  } else if ((this.spaces[0].mark === this.spaces[3].mark) && (this.spaces[0].mark === this.spaces[6].mark)&& (this.spaces[0].mark != undefined)) {
     winningMark = this.spaces[0].mark;
-  } else if (this.spaces[1].mark === this.spaces[4].mark === this.spaces[7].mark) {
+  } else if ((this.spaces[1].mark === this.spaces[4].mark) && (this.spaces[1].mark === this.spaces[7].mark)&& (this.spaces[1].mark != undefined)) {
     winningMark = this.spaces[1].mark;
-  } else if (this.spaces[2].mark === this.spaces[5].mark === this.spaces[8].mark) {
+  } else if ((this.spaces[2].mark === this.spaces[5].mark) && (this.spaces[2].mark === this.spaces[8].mark)&& (this.spaces[2].mark != undefined)) {
     winningMark = this.spaces[2].mark;
-  } else if (this.spaces[1].mark === this.spaces[4].mark === this.spaces[8].mark) {
-    winningMark = this.spaces[1].mark;
-  } else if (this.spaces[2].mark === this.spaces[4].mark === this.spaces[6].mark) {
+  } else if ((this.spaces[0].mark === this.spaces[4].mark) && (this.spaces[0].mark === this.spaces[8].mark)&& (this.spaces[0].mark != undefined)) {
+    winningMark = this.spaces[0].mark;
+  } else if ((this.spaces[2].mark === this.spaces[4].mark) && (this.spaces[2].mark === this.spaces[6].mark)&& (this.spaces[2].mark != undefined)) {
     winningMark = this.spaces[2].mark;
   }
+
   return winningMark;
 };
 
 Board.prototype.nextPlayer = function() {
+  if(this.players[0].isCurrentPlayer) {
+    this.players[0].isCurrentPlayer = false;
+    this.players[1].isCurrentPlayer = true;
+  } else{
+    this.players[1].isCurrentPlayer = false;
+    this.players[0].isCurrentPlayer = true;
+  };
 };
+Board.prototype.getMark = function() {
+  if(this.players[0].isCurrentPlayer){
+    this.nextPlayer();
+    return this.players[0].markType;
+  } else{
+    this.nextPlayer();
+    return this.players[1].markType;
+  }
+};
+
+Board.prototype.newPlayers = function() {
+  this.players = []
+  this.players.push(new Player());
+  this.players.push(new Player());
+  this.players[0].isCurrentPlayer = true;
+  this.players[0].markType = 'X';
+  this.players[1].markType = 'O';
+}
 
 Board.prototype.newBoard = function(){
   this.spaces = []
@@ -75,6 +95,22 @@ Board.prototype.newBoard = function(){
   };
 };
 
-var board = new Board();
-console.log(board);
-var testSpace = board.findCoordinates(2,1);
+
+$(document).ready(function() {
+  var newBoard = new Board();
+  $(".game-board").each(function() {
+    $("button").click(function() {
+      var buttonCoord = $(this).attr("value");
+      var coords = buttonCoord.split(",")
+      var x = parseInt(coords[0]);
+      var y = parseInt(coords[1]);
+      var space = newBoard.findCoordinates(x, y);
+      space.mark = newBoard.getMark();
+      $(this).text(space.mark)
+      $(this).off();
+      if(newBoard.checkWinMark()) {
+        alert(newBoard.checkWinMark() + " Wins!")
+      };
+    });
+  });
+});
